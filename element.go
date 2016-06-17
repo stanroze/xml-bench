@@ -2,6 +2,10 @@ package stanza
 
 import "encoding/xml"
 
+var whiteList map[string]struct{} = map[string]struct{}{
+	"//Person/Email/Addr": struct{}{},
+}
+
 type Element struct {
 	lookup     map[string]string
 	Space, Tag string
@@ -77,7 +81,10 @@ func createChildren(parent string, d *xml.Decoder, m map[string]string) (childre
 			if len(data) <= 0 {
 				return
 			}
-			m[parent] = data
+			_, add := whiteList[parent]
+			if add {
+				m[parent] = data
+			}
 			children = append(children, CharData{Data: data})
 		}
 	}
