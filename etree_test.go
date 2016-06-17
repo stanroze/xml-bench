@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/ThomsonReutersEikon/etree"
+	"github.com/stretchr/testify/assert"
 )
 
 type Email struct {
@@ -48,19 +49,20 @@ var data = `
 		</Person>
 	`
 
-func etreeParse() {
+func etreeParse() string {
 	doc := etree.NewDocument()
 	doc.ReadFromString(data)
-	doc.FindElement("//Email/Addr")
+	e := doc.FindElement("//Email/Addr")
+	return e.Text()
 }
 
-func xmlMarshal() {
+func xmlMarshal() string {
 	v := Result{Name: "none", Phone: "none"}
 	xml.Unmarshal([]byte(data), &v)
-
+	return v.Email[0].Addr
 }
 
-func xmlDecode() {
+func xmlDecode() string {
 	d := xml.NewDecoder(strings.NewReader(data))
 	for {
 		s, err := d.Token()
@@ -70,9 +72,29 @@ func xmlDecode() {
 		switch se := s.(type) {
 		case xml.StartElement:
 			el := New(se, d)
-			el.Find("//Person/Email/Addr")
+			return el.Find("//Person/Email/Addr")
 		}
 	}
+
+	return ""
+}
+
+func TestXmlDecode(t *testing.T) {
+	want := "gre@example.com"
+	what := xmlDecode()
+	assert.Equal(t, what, want, "XmlDecode expected a different result")
+}
+
+func TestEtree(t *testing.T) {
+	want := "gre@example.com"
+	what := etreeParse()
+	assert.Equal(t, what, want, "Etree expected a different result")
+}
+
+func TestXmlMarshal(t *testing.T) {
+	want := "gre@example.com"
+	what := xmlMarshal()
+	assert.Equal(t, what, want, "XmlMarshal expected a different result")
 }
 
 func BenchmarkXmlDecode(b *testing.B) {
@@ -88,7 +110,7 @@ func BenchmarkEtree(b *testing.B) {
 	}
 }
 
-func BenchmarkMarshal(b *testing.B) {
+func BenchmarkXmlMarshal(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		xmlMarshal()
 	}
