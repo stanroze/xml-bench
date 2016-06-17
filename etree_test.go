@@ -9,57 +9,63 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-type Email struct {
-	Where string `xml:"where,attr"`
-	Addr  string
+type Iq struct {
+	To        string `xml:"to,attr"`
+	From      string `xml:"from,attr"`
+	Type      string `xml:"type,attr"`
+	ID        string `xml:"id,attr"`
+	Bind      Bind
+	Extension []AnyHolder `xml:",any"`
 }
-type Address struct {
-	City, State string
+
+type AnyHolder struct {
+	XMLName xml.Name
+	XML     string `xml:",innerxml"`
 }
-type Result struct {
-	XMLName xml.Name `xml:"Person"`
-	Name    string   `xml:"FullName"`
-	Phone   string
-	Email   []Email
-	Groups  []string `xml:"Group>Value"`
-	Address
+
+type Bind struct {
+	Jid string
 }
 
 var data = `
-		<Person>
-			<FullName>Grace R. Emlin</FullName>
-			<Company>Example Inc.</Company>
-			<Email where="home">
-				<Addr>gre@example.com</Addr>
-			</Email>
-      		<Group>
-				<Value>Friends</Value>
-				<Value>Squash</Value>
-                <Value>Friends</Value>
-				<Value>Squash</Value>
-                <Value>Friends</Value>
-				<Value>Squash</Value>
-                <Value>Friends</Value>
-				<Value>Squash</Value>
-                <Value>Friends</Value>
-				<Value>Squash</Value>
-			</Group>
-			<City>Hanga Roa</City>
-			<State>Easter Island</State>
-		</Person>
-	`
+<iq to='juliet@capulet.com/core' type='result' id='bind-1'>
+     <Bind>
+       <Jid>stan.test@capulet.com/core</Jid>
+     </Bind>
+	 <Extra>
+	 	<S>
+		 	<T>Hello World</T>
+		 </S>
+		 <S>
+		 	<T>Hello World</T>
+		 </S>
+		 <S>
+		 	<T>Hello World</T>
+		 </S>
+		 <S>
+		 	<T>Hello World</T>
+		 </S>
+		 <S>
+		 	<T>Hello World</T>
+		 </S>
+		 <S>
+		 	<T>Hello World</T>
+		 </S>
+	 </Extra>
+   </iq>
+`
 
 func etreeParse() string {
 	doc := etree.NewDocument()
 	doc.ReadFromString(data)
-	e := doc.FindElement("//Email/Addr")
+	e := doc.FindElement("//Bind/Jid")
 	return e.Text()
 }
 
 func xmlMarshal() string {
-	v := Result{Name: "none", Phone: "none"}
-	xml.Unmarshal([]byte(data), &v)
-	return v.Email[0].Addr
+	iq := Iq{}
+	xml.Unmarshal([]byte(data), &iq)
+	return iq.Bind.Jid
 }
 
 func xmlDecode() string {
@@ -72,7 +78,7 @@ func xmlDecode() string {
 		switch se := s.(type) {
 		case xml.StartElement:
 			el := New(se, d)
-			return el.Find("//Person/Email/Addr")
+			return el.Find("//iq/Bind/Jid")
 		}
 	}
 
@@ -80,20 +86,21 @@ func xmlDecode() string {
 }
 
 func TestXmlDecode(t *testing.T) {
-	want := "gre@example.com"
+	want := "stan.test@capulet.com/core"
 	what := xmlDecode()
 	assert.Equal(t, what, want, "XmlDecode expected a different result")
 }
 
 func TestEtree(t *testing.T) {
-	want := "gre@example.com"
+	want := "stan.test@capulet.com/core"
 	what := etreeParse()
 	assert.Equal(t, what, want, "Etree expected a different result")
 }
 
 func TestXmlMarshal(t *testing.T) {
-	want := "gre@example.com"
+	want := "stan.test@capulet.com/core"
 	what := xmlMarshal()
+
 	assert.Equal(t, what, want, "XmlMarshal expected a different result")
 }
 

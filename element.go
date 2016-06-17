@@ -4,6 +4,7 @@ import "encoding/xml"
 
 var whiteList map[string]struct{} = map[string]struct{}{
 	"//Person/Email/Addr": struct{}{},
+	"//iq/Bind/Jid":       struct{}{},
 }
 
 type Element struct {
@@ -81,6 +82,7 @@ func createChildren(parent string, d *xml.Decoder, m map[string]string) (childre
 			if len(data) <= 0 {
 				return
 			}
+
 			_, add := whiteList[parent]
 			if add {
 				m[parent] = data
