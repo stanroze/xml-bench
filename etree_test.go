@@ -55,7 +55,26 @@ var data = `
    </iq>
 `
 
+func runEtree(n int) {
+	for i := 0; i < n; i++ {
+		etreeParse()
+	}
+}
+
+func runXmlDecode(n int) {
+	for i := 0; i < n; i++ {
+		xmlDecode()
+	}
+}
+
+func runXmlMarshal(n int) {
+	for i := 0; i < n; i++ {
+		xmlMarshal()
+	}
+}
+
 func etreeParse() string {
+
 	doc := etree.NewDocument()
 	doc.ReadFromString(data)
 	e := doc.FindElement("//Bind/Jid")
@@ -108,6 +127,25 @@ func BenchmarkXmlDecode(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		xmlDecode()
 	}
+
+}
+
+func BenchmarkXmlDecode1000(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		runXmlDecode(1000)
+	}
+}
+
+func BenchmarkXmlDecode10000(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		runXmlDecode(10000)
+	}
+}
+
+func BenchmarkXmlDecode100000(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		runXmlDecode(100000)
+	}
 }
 
 func BenchmarkEtree(b *testing.B) {
@@ -117,8 +155,44 @@ func BenchmarkEtree(b *testing.B) {
 	}
 }
 
+func BenchmarkEtree1000(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		runEtree(1000)
+	}
+}
+
+func BenchmarkEtree10000(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		runEtree(10000)
+	}
+}
+
+func BenchmarkEtree100000(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		runEtree(100000)
+	}
+}
+
 func BenchmarkXmlMarshal(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		xmlMarshal()
+	}
+}
+
+func BenchmarkXmlMarshal1000(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		runXmlMarshal(1000)
+	}
+}
+
+func BenchmarkXmlMarshal10000(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		runXmlMarshal(10000)
+	}
+}
+
+func BenchmarkXmlMarshal100000(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		runXmlMarshal(100000)
 	}
 }
